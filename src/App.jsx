@@ -1,17 +1,21 @@
 import { Canvas } from "@react-three/fiber"
+import { Environment, OrbitControls, Loader } from "@react-three/drei"
+import { Suspense } from "react"
+import LoadModel from "./components/LoadModel"
 
 export default function App() {
   return (
-    <div id="canvas-container">
-      <Canvas>
-        <ambientLight intensity={0.1} />
-        <directionalLight color="red" position={[0, 0, 5]} />
-
-        <mesh>
-          <boxGeometry args={[2, 2, 2]} />
-          <meshStandardMaterial />
-        </mesh>
-      </Canvas>
+    <div>
+      <div className="h-screen w-screen">
+        <Canvas>
+          <Suspense fallback={null}>
+            <LoadModel />
+            <OrbitControls />
+            <Environment preset="sunset" background />
+          </Suspense>
+        </Canvas>
+        <Loader />
+      </div>
     </div>
   )
 }
