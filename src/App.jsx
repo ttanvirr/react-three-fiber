@@ -1,7 +1,8 @@
 import { Canvas } from "@react-three/fiber"
 import { Environment, OrbitControls, Loader } from "@react-three/drei"
 import { Suspense } from "react"
-import LoadModel from "./components/LoadModel"
+// import LoadModel from "./components/LoadModel"
+import LoadTexture from "./components/LoadTexture"
 
 export default function App() {
   return (
@@ -9,9 +10,10 @@ export default function App() {
       <div className="h-screen w-screen">
         <Canvas>
           <Suspense fallback={null}>
-            <LoadModel />
+            {/* <LoadModel /> */}
             <OrbitControls />
-            <Environment preset="sunset" background />
+            {/* <Environment preset="sunset" background /> */}
+            <LoadTexture />
           </Suspense>
         </Canvas>
         <Loader />

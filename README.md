@@ -384,3 +384,126 @@ You can override `Loader` styles, too.
   initialState={(active) => active} // Initial black out state
 >
 ```
+
+# Loading Textures
+
+We can download textures from sites like [cc0textures](https://cc0textures.com/).
+
+## Using useTexture
+
+using `useTexture` from `@react-three/drei`, is slightly easier than other methods.
+
+It's better to explain with code, let's say you downloaded [this texture](https://cc0textures.com/view?id=PavingStones092) and placed it in the public folder of your site. Create a new file `src/components/LoadTexture.jsx`. To get the color map from it you could do:
+
+`src/components/LoadTexture.jsx`
+
+```jsx
+import { useTexture } from "@react-three/drei"
+
+export default function LoadTexture() {
+  const colorMap = useTexture("PavingStones092_1K-JPG_Color.jpg")
+  ...
+
+```
+
+Let's then with this information create a small scene where we can use this texture:
+
+`src/components/LoadTexture.jsx`
+
+```jsx
+import { useTexture } from "@react-three/drei"
+
+export default function LoadTexture() {
+  const colorMap = useTexture("PavingStones092_1K-JPG_Color.jpg")
+
+  return (
+    <>
+      <ambientLight intensity={0.2} />
+      <directionalLight />
+      <mesh>
+        {/* Width and height segments for displacementMap */}
+        <sphereGeometry args={[1, 100, 100]} />
+        <meshStandardMaterial />
+      </mesh>
+    </>
+  )
+}
+```
+
+If everything went according to plan, you should now be able to apply this texture to the sphere like so:
+
+```jsx
+<meshStandardMaterial map={colorMap} />
+```
+
+Awesome! That works but we have a lot more textures.
+
+We can use an array to pass all the textures we have and the maps will be returned and ready to use:
+
+```jsx
+import { useTexture } from "@react-three/drei"
+
+export default function LoadTexture() {
+  const [colorMap, displacementMap, normalMap, roughnessMap, aoMap] =
+    useTexture([
+      "PavingStones092_1K-JPG_Color.jpg",
+      "PavingStones092_1K-JPG_Displacement.jpg",
+      "PavingStones092_1K-JPG_Normal.jpg",
+      "PavingStones092_1K-JPG_Roughness.jpg",
+      "PavingStones092_1K-JPG_AmbientOcclusion.jpg",
+    ])
+
+  return (
+    <>
+      <ambientLight intensity={0.2} />
+      <directionalLight />
+      <mesh>
+        {/* Width and height segments for displacementMap */}
+        <sphereGeometry args={[1, 32, 32]} />
+        <meshStandardMaterial
+          map={colorMap}
+          displacementMap={displacementMap}
+          normalMap={normalMap}
+          roughnessMap={roughnessMap}
+          aoMap={aoMap}
+          displacementScale={0.2}
+        />
+      </mesh>
+    </>
+  )
+}
+```
+
+The displacement will probably be too much, usually setting it to `0.2` will make it look good:
+
+```jsx
+<meshStandardMaterial
+  displacementScale={0.2}
+  map={colorMap}
+  displacementMap={displacementMap}
+  normalMap={normalMap}
+  roughnessMap={roughnessMap}
+  aoMap={aoMap}
+/>
+```
+
+You can also use object-notation which is the most convenient:
+
+```jsx
+const props = useTexture({
+  map: "PavingStones092_1K-JPG_Color.jpg",
+  displacementMap: "PavingStones092_1K-JPG_Displacement.jpg",
+  normalMap: "PavingStones092_1K-JPG_Normal.jpg",
+  roughnessMap: "PavingStones092_1K-JPG_Roughness.jpg",
+  aoMap: "PavingStones092_1K-JPG_AmbientOcclusion.jpg",
+})
+
+return (
+  <mesh>
+    <sphereGeometry args={[1, 100, 100]} />
+    <meshStandardMaterial displacementScale={0.2} {...props} />
+  </mesh>
+)
+```
+
+Check that everything works fine.
