@@ -507,3 +507,80 @@ return (
 ```
 
 Check that everything works fine.
+
+# Basic Animations
+
+We will build a really small, continuous animation loop, that will be the basic building block of more advanced animations later on.
+
+## useFrame
+
+`useFrame` is a Fiber hook that lets you execute code on every frame of Fiber's render loop. This can have a lot of uses, but we will focus on building an animation with it.
+
+It's important to remember that Fiber hooks can only be called inside a `<Canvas />` parent!
+
+```jsx
+import { useFrame } from "@react-three/fiber"
+
+function AnimateBox() {
+  useFrame(() => {
+    console.log("Hey, I'm executing every frame!")
+  })
+  return (
+    <mesh>
+      <boxGeometry />
+      <meshBasicMaterial color="royalblue" />
+    </mesh>
+  )
+}
+```
+
+This loop is the basic building block of our animation, the callback we pass to `useFrame` will be executed every frame and it will be passed an object containing the state of our Fiber scene:
+
+For example, we can extract time information from the `clock` parameter, to know how much time has elapsed in our application, and use that time to animate a value:
+
+```jsx
+useFrame(({ clock }) => {
+  const a = clock.elapsedTime
+  console.log(a) // the value will be 0 at scene initialization and grow each frame
+})
+```
+
+clock is a `three.js` Clock object, from which we are getting the total elapsed time, which will be key for our animations.
+
+## Animating with Refs
+
+Dealing with continuous updates commonly known as transient updates. We want to directly mutate our mesh each frame. First, we'll have to get a reference to it, via the `useRef` React hook:
+
+```jsx
+import { useFrame } from "@react-three/fiber"
+import { useRef } from "react"
+
+export default function AnimateBox() {
+  const myMesh = useRef()
+
+  return (
+    <mesh ref={myMesh}>
+      <boxGeometry />
+      <meshStandardMaterial color="royalblue" />
+    </mesh>
+  )
+}
+```
+
+`myMesh` will now hold a reference to the actual `three.js` object, which we can now freely mutate in `useFrame`, without having to worry about React:
+
+```jsx
+useFrame(({ clock }) => {
+  myMesh.current.rotation.x = clock.elapsedTime
+})
+```
+
+Let's have a closer look:
+
+- We are destructuring `clock` from the argument passed to `useFrame`, which we know is the state of our Fiber scene.
+- We are accessing the `rotation.x` property of `myMesh.current` object, which is a reference to our `mesh` object
+- We are assigning our time-dependent value `a` to the rotation on the `x` axis, meaning our object will now infinitely rotate between `-1` and `1` radians around the `x` axis!
+
+## Exercises
+
+- Try `Math.sin(clock.elapsedTime)` and see how your animation changes
